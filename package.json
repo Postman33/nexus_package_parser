@@ -1,0 +1,8 @@
+{
+  "name": "nexus_npm_modules",
+  "version": "1.0.0",
+  "dependencies": {
+    "ansi-colors": "^4.1.3",
+    "cli-progress": "^3.11.1"
+  }
+}
