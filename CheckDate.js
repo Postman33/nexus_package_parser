@@ -6,15 +6,7 @@ const path = require("path");
 const fs = require("fs");
 const day24Feb = new Date('2022-02-24T06:00:00');
 let errorsPackages = new Set();
-
-function ReadFile(filename) {
-    let res
-    let filePath = path.join(__dirname, `./${filename}.json`);
-    let data = fs.readFileSync(filePath, 'utf8');
-    res = JSON.parse(data);
-    return res;
-}
-
+let ReadFile = require("utils/readFile")
 
 function execFn(name, arrayOfVersions) {
     return new Promise((done, failed) => {
