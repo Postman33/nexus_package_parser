@@ -28,14 +28,14 @@ function execFn(name, arrayOfVersions) {
                     let date_ob = new Date(json[version]);
                     if (date_ob > day24Feb) {
                         check = false;
-                        errorsPackages.add(name + "@" + version)
+                        errorsPackages.add(name + "@" + arrayOfVersions)
                     }
                 }
 
                 MRU_Cache[name] = {
                     name: name,
                     version: arrayOfVersions,
-                    validTo: Date.now() +1000*60*60,
+                    validTo: Date.now() +90*1000*60*60,
                     json: json
                 }
 
@@ -52,17 +52,16 @@ function execFn(name, arrayOfVersions) {
 
 
                 let json = MRU_label.json;
-                let arrayOfVersions = MRU_label.version
                 let check = true;
-                // for (let key in arrayOfVersions) {
-                //     let version = arrayOfVersions[key]
-                //     let date_ob = new Date(json[version]);
-                //     if (date_ob > day24Feb) {
-                //         check = false;
-                //         errorsPackages.add(name + "@" + MRU_label.version)
-                //     }
-                // }
-                console.log(json)
+                for (let key in arrayOfVersions) {
+                    let version = arrayOfVersions[key]
+                    let date_ob = new Date(json[version]);
+                    if (date_ob > day24Feb) {
+                        check = false;
+                        errorsPackages.add(name + "@" + version)
+                    }
+                }
+                //console.log(json)
                     //errorsPackages.add(name + "@" + MRU_label.version)
 
                 resolve(MRU_label)
