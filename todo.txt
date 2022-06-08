@@ -1,0 +1,9 @@
+  '@babel/helper-function-name@7.17.9',
+  '@babel/helper-member-expression-to-functions@7.17.7',
+  '@babel/types@7.18.2',
+  '@babel/helper-plugin-utils@7.17.12'
+
+
+  '@jridgewell/set-array@1.0.0',
+  '@jridgewell/trace-mapping@0.3.9',
+  'lilconfig@2.0.5'

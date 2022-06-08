@@ -6,9 +6,9 @@ function isNumber(val) {
     return /^[-]?\d+$/.test(val);
 }
 
-let ReadFile = require("utils/readFile")
+let ReadFile = require("./utils/file_system/readFile")
 
-let WriteFile = require("utils/writeFile")
+let WriteFile = require("./utils/file_system/writeFile")
 
 
 
@@ -349,7 +349,7 @@ for (let i in allDependencies) {
                     existing.set(pName,new Set())
                 }
                 if(!existing.get(pName).has(pVersion)) existing.get(pName).add(pVersion)
-
+            p++
             } else {
                 // TODO: Коррекция версий
                // if (!res.includes(check_dependies.dependencies[pName].version))

@@ -1,20 +1,18 @@
 const {exec} = require('child_process');
 const cliProgress = require("cli-progress")
 const colors = require("ansi-colors")
-let nexus = require('./dependies.json');
-const path = require("path");
-const fs = require("fs");
+//let nexus = require('./dependies.json');
 const day24Feb = new Date('2022-02-24T06:00:00');
 let errorsPackages = new Set();
-let ReadFile = require("utils/readFile")
+let ReadFile = require("./utils/file_system/readFile")
 
 function execFn(name, arrayOfVersions) {
-    return new Promise((done, failed) => {
+    return new Promise((resolve, reject) => {
         exec(
             `npm view ${name} time --json`,
             (error, stdout, stderr) => {
                 if (error) {
-                    failed(error)
+                    reject(error)
                     return;
                 }
                 let json = JSON.parse(stdout);
@@ -28,16 +26,16 @@ function execFn(name, arrayOfVersions) {
                     }
                 }
                 if (check)
-                    done({name: name, version: arrayOfVersions, date: true})
+                    resolve({name: name, version: arrayOfVersions, date: true})
                 else
-                    done({name: name, version:arrayOfVersions, date: false})
+                    resolve({name: name, version:arrayOfVersions, date: false})
             }
         );
     });
 }
 
 let asyncFn = async function () {
-    let readFile = await ReadFile("Существующие пакеты_")
+    let readFile = await ReadFile("Несуществующие пакеты_")
 
     const b1 = new cliProgress.SingleBar({
         format: "CLI " + colors.cyan('{bar}') + "| {percentage}% || {value}/{total} Chunks || Speed: {speed}",
@@ -71,9 +69,10 @@ let asyncFn = async function () {
             console.log(r)
         })
     }
+    b1.stop()
     console.log("Ошибки в пакетах")
     console.log(errorsPackages)
-    b1.stop()
+
 
 
 }
