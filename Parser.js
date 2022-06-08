@@ -14,107 +14,114 @@ let WriteFile = require("./utils/file_system/writeFile")
 
 let allDependencies = check_dependies.dependencies;
 
-let FgRed = "\x1b[31m"
-let FgGreen = "\x1b[32m"
+function ModuleTests() {
+    let FgRed = "\x1b[31m"
+    let FgGreen = "\x1b[32m"
 
 
-let cfg = {
-    successful: 0,
-    failded: 0,
-}
-
-let wrapperC2W = wrapperBase.bind(compareTwoVersionsUp)
-let wrapperC2N = wrapperBase.bind(compareTwoVersionsNumbers)
-let wrapperC2T = wrapperBase.bind(compareTwoVersionsTilda)
-
-console.log("\n")
-console.log("-----------------------")
-console.log("-----------------------")
-console.log("--------Up ^----------")
-console.log("-----------------------")
-console.log("-----------------------")
-console.log("\n")
-
-wrapperC2W([1, 3, 5], [1, 4, 0]).isTrue()
-wrapperC2W([1, 0, 5], [1, 0, 5]).isTrue()
-wrapperC2W([0, 1, 5], [2, 4, 0]).isFalse()
-wrapperC2W([1, 3, 5], [1, 4, 0]).isTrue()
-wrapperC2W([0, 3, 5], [0, 2, 0]).isFalse()
-wrapperC2W([1, 0, 0], [0, 9, 6]).isFalse()
-
-console.log("\n")
-console.log("-----------------------")
-console.log("-----------------------")
-console.log("--------Tilda----------")
-console.log("-----------------------")
-console.log("-----------------------")
-console.log("\n")
-
-wrapperC2N([1, 3, 5], [1, 4, 0]).isFalse()
-wrapperC2N([1, 0, 5], [1, 0, 5]).isTrue()
-wrapperC2N([0, 1, 5], [2, 4, 0]).isFalse()
-wrapperC2N([1, 3, 5], [1, 4, 0]).isFalse()
-wrapperC2N([0, 3, 5], [0, 2, 0]).isFalse()
-wrapperC2N([1, 0, 0], [0, 9, 6]).isFalse()
-
-console.log("\n")
-console.log("-----------------------")
-console.log("-----------------------")
-console.log("--------Equals----------")
-console.log("-----------------------")
-console.log("-----------------------")
-console.log("\n")
-
-
-wrapperC2T([1, 3, 5], [1, 3, 2]).isFalse()
-wrapperC2T([1, 0, 5], [1, 0, 5]).isTrue()
-wrapperC2T([0, 1, 5], [2, 4, 0]).isFalse()
-wrapperC2T([1, 3, 5], [1, 4, 0]).isFalse()
-wrapperC2T([0, 2, 5], [0, 2, 0]).isFalse()
-wrapperC2T([1, 0, 0], [0, 9, 6]).isFalse()
-wrapperC2T([1, 0, 0], [0, 9, 6]).isFalse()
-wrapperC2T([1, 1, 0], [1, 1, 0]).isTrue()
-wrapperC2T([1, 1, 1], [1, 1, 0]).isFalse()
-
-console.log("\n")
-console.log("-----------------------")
-console.log("-----------------------")
-console.log("----------END----------")
-console.log("-----------------------")
-console.log("-----------------------")
-console.log("\n")
-
-console.log(`Всего ${cfg.successful + cfg.failded}`)
-console.log(FgGreen,`Успешных ${cfg.successful}`)
-console.log(FgRed,`Неуспешных ${cfg.failded}`)
-function wrapperBase(explodedVersionNumbers, explodedNesusVersion) {
-    return {
-        obj: this(explodedVersionNumbers, explodedNesusVersion),
-        checkTrue() {
-            return this.obj === true;
-        },
-        isTrue() {
-            if (this.checkTrue()) {
-                console.log(FgGreen, `Check true successful ${explodedVersionNumbers} < nexus ${explodedNesusVersion}`);
-                cfg.successful++;
-            } else {
-                console.log(FgRed, `Check true failed need ${explodedVersionNumbers} > nexus ${explodedNesusVersion} ${this.obj}`);
-                cfg.failded++;
-            }
-        },
-        isFalse() {
-            if (!this.checkTrue()) {
-                console.log(FgGreen, `Check false successful ${explodedVersionNumbers} > nexus ${explodedNesusVersion}`);
-                cfg.successful++;
-            } else {
-                console.log(FgRed, `Check false failed need ${explodedVersionNumbers} < nexus ${explodedNesusVersion} ${this.obj}`);
-                cfg.failded++;
-            }
-        },
-
-
+    let cfg = {
+        successful: 0,
+        failded: 0,
     }
+
+    let wrapperC2W = wrapperBase.bind(compareTwoVersionsUp)
+    let wrapperC2N = wrapperBase.bind(compareTwoVersionsNumbers)
+    let wrapperC2T = wrapperBase.bind(compareTwoVersionsTilda)
+
+    console.log("\n")
+    console.log("-----------------------")
+    console.log("-----------------------")
+    console.log("--------Up ^----------")
+    console.log("-----------------------")
+    console.log("-----------------------")
+    console.log("\n")
+
+    wrapperC2W([1, 3, 5], [1, 4, 0]).isTrue()
+    wrapperC2W([1, 0, 5], [1, 0, 5]).isTrue()
+    wrapperC2W([0, 1, 5], [2, 4, 0]).isFalse()
+    wrapperC2W([1, 3, 5], [1, 4, 0]).isTrue()
+    wrapperC2W([0, 3, 5], [0, 2, 0]).isFalse()
+    wrapperC2W([1, 0, 0], [0, 9, 6]).isFalse()
+
+    console.log("\n")
+    console.log("-----------------------")
+    console.log("-----------------------")
+    console.log("--------Tilda----------")
+    console.log("-----------------------")
+    console.log("-----------------------")
+    console.log("\n")
+
+    wrapperC2N([1, 3, 5], [1, 4, 0]).isFalse()
+    wrapperC2N([1, 0, 5], [1, 0, 5]).isTrue()
+    wrapperC2N([0, 1, 5], [2, 4, 0]).isFalse()
+    wrapperC2N([1, 3, 5], [1, 4, 0]).isFalse()
+    wrapperC2N([0, 3, 5], [0, 2, 0]).isFalse()
+    wrapperC2N([1, 0, 0], [0, 9, 6]).isFalse()
+
+    console.log("\n")
+    console.log("-----------------------")
+    console.log("-----------------------")
+    console.log("--------Equals----------")
+    console.log("-----------------------")
+    console.log("-----------------------")
+    console.log("\n")
+
+
+    wrapperC2T([1, 3, 5], [1, 3, 2]).isFalse()
+    wrapperC2T([1, 0, 5], [1, 0, 5]).isTrue()
+    wrapperC2T([0, 1, 5], [2, 4, 0]).isFalse()
+    wrapperC2T([1, 3, 5], [1, 4, 0]).isFalse()
+    wrapperC2T([0, 2, 5], [0, 2, 0]).isFalse()
+    wrapperC2T([1, 0, 0], [0, 9, 6]).isFalse()
+    wrapperC2T([1, 0, 0], [0, 9, 6]).isFalse()
+    wrapperC2T([1, 1, 0], [1, 1, 0]).isTrue()
+    wrapperC2T([1, 1, 1], [1, 1, 0]).isFalse()
+
+    console.log("\n")
+    console.log("-----------------------")
+    console.log("-----------------------")
+    console.log("----------END----------")
+    console.log("-----------------------")
+    console.log("-----------------------")
+    console.log("\n")
+
+    console.log(`Всего ${cfg.successful + cfg.failded}`)
+    console.log(FgGreen, `Успешных ${cfg.successful}`)
+    console.log(FgRed, `Неуспешных ${cfg.failded}`)
+
+    function wrapperBase(explodedVersionNumbers, explodedNesusVersion) {
+        return {
+            obj: this(explodedVersionNumbers, explodedNesusVersion),
+            checkTrue() {
+                return this.obj === true;
+            },
+            isTrue() {
+                if (this.checkTrue()) {
+                    console.log(FgGreen, `Check true successful ${explodedVersionNumbers} < nexus ${explodedNesusVersion}`);
+                    cfg.successful++;
+                } else {
+                    console.log(FgRed, `Check true failed need ${explodedVersionNumbers} > nexus ${explodedNesusVersion} ${this.obj}`);
+                    cfg.failded++;
+                }
+            },
+            isFalse() {
+                if (!this.checkTrue()) {
+                    console.log(FgGreen, `Check false successful ${explodedVersionNumbers} > nexus ${explodedNesusVersion}`);
+                    cfg.successful++;
+                } else {
+                    console.log(FgRed, `Check false failed need ${explodedVersionNumbers} < nexus ${explodedNesusVersion} ${this.obj}`);
+                    cfg.failded++;
+                }
+            },
+
+
+        }
+    }
+
+    return FgGreen;
 }
+
+let FgGreen = ModuleTests();
 
 // ^ версия
 function compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion) {
@@ -317,59 +324,54 @@ if (result.length !== 0){
 
 console.log(FgGreen)
 
+function searchDependencies(reqDependency, version) {
+    let res = searchVersion(reqDependency, version)
+    let nexusPacketVersions = nexus.dependencies[reqDependency] // Что есть в нексусе
+    let pName = `${reqDependency}`  // packageName formatter
+    let pVersion = `${version.replace("^", "")}` // packageVersion formatter
+    if (nexusPacketVersions === undefined) {
+
+        if (!nonExsisting.get(pName))
+            nonExsisting.set(pName, new Set())
+        if (!nonExsisting.get(pName).has(pVersion))
+            nonExsisting.get(pName).add(pVersion)
+        p++
+    } else {
+        if (res.length === 0) { // В res будут элементЫ, если есть подходящие версии
+
+
+            if (!existing.get(pName)) {
+                existing.set(pName, new Set())
+            }
+            if (!existing.get(pName).has(pVersion)) existing.get(pName).add(pVersion)
+            p++
+        }
+
+    }
+}
+
 for (let i in allDependencies) {
     //console.log(i)
     if (i === '') continue
     let topLevelDependency = allDependencies[i]
+    if (topLevelDependency.resolved) {
+        if (topLevelDependency.resolved.search("smart.mos.ru") !== -1) continue
+    }
+    searchDependencies(i, topLevelDependency.version);
     if (!topLevelDependency.requires) continue
 
 
 
     for (let reqDependency in topLevelDependency['requires']) {
         let version = topLevelDependency['requires'][reqDependency]
+        if (topLevelDependency.resolved.search("smart.mos.ru") !== -1) continue
+
         if (version.search('[x\*]') !== -1) continue
         if (version.search(/>=|<=|<|>|!=|\|\|/) !== -1) continue
+        searchDependencies(reqDependency, version);
 
-        let res = searchVersion(reqDependency, version)
-        let nexusPacketVersions = nexus.dependencies[reqDependency] // Что есть в нексусе
-        let pName = `${reqDependency}`  // packageName formatter
-        let pVersion = `${version.replace("^","")}` // packageVersion formatter
-        if (nexusPacketVersions === undefined){
-
-            if (!nonExsisting.get(pName))
-                nonExsisting.set(pName,new Set())
-            if(!nonExsisting.get(pName).has(pVersion))
-                nonExsisting.get(pName).add(pVersion)
-            p++
-        } else {
-            if (res.length === 0){ // В res будут элементЫ, если есть подходящие версии
-
-
-                if (!existing.get(pName)){
-                    existing.set(pName,new Set())
-                }
-                if(!existing.get(pName).has(pVersion)) existing.get(pName).add(pVersion)
-            p++
-            } else {
-                // TODO: Коррекция версий
-               // if (!res.includes(check_dependies.dependencies[pName].version))
-               // versionCorrection[pName] = res
-
-            }
-
-
-
-        }
-
-       // if (res.length === 0) console.log(reqDependency, version)
-        //  console.log(version)
-        // console.log(res)
-        // if (reqDependency === 'type-fest') {
-        //console.log(res)
-        // }
     }
 
-    //console.log(i)
 }
 WriteFile("corrections",JSON.stringify(versionCorrection))
 //console.log("End")
