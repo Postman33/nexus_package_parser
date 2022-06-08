@@ -10,7 +10,8 @@ let ReadFile = require("./utils/file_system/readFile")
 
 let WriteFile = require("./utils/file_system/writeFile")
 
-
+let nonExsisting = new Map()
+let existing = new Map()
 
 let allDependencies = check_dependies.dependencies;
 
@@ -118,10 +119,9 @@ function ModuleTests() {
         }
     }
 
-    return FgGreen;
-}
+   }
 
-let FgGreen = ModuleTests();
+let moduleTests = ModuleTests();
 
 // ^ версия
 function compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion) {
@@ -224,8 +224,7 @@ function compareTwoVersionsTilda(explodedVersionNumbers, explodedNesusVersion) {
 let versionCorrection = {}
 // depElementKey - название пакета
 let p = 0
-let nonExsisting = new Map()
-let existing = new Map()
+
 function searchVersion(packetName, version) {
     let result = []
     let explodedVersion = version.split("."); // Разбиваем через точки номера версий
@@ -245,12 +244,13 @@ function searchVersion(packetName, version) {
             compareResult = compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion);
         }
         if (firstCharOfMajorVersion === "~") {
-            compareResult =true;// compareTwoVersionsTilda(explodedVersionNumbers, explodedNesusVersion);
+            compareResult =compareTwoVersionsTilda(explodedVersionNumbers, explodedNesusVersion);
+            compareResult = true // TODO: проверить
         }
         if (isNumber(majorVersion) && majorVersion[0] !== "^") {
-            compareResult =true// compareTwoVersionsNumbers(explodedVersionNumbers, explodedNesusVersion);
+            compareResult =compareTwoVersionsNumbers(explodedVersionNumbers, explodedNesusVersion);
+            compareResult = true // TODO: проверить
         }
-
 
         if (compareResult) {
             result.push(nexusVersion)
@@ -259,8 +259,7 @@ function searchVersion(packetName, version) {
     }
 
 
-    if (isNumber(majorVersion) && majorVersion[0] !== "^") {
-
+    if (isNumber(majorVersion) && majorVersion[0] !== "^") { // TODO: проверить
         let compareResult = false
         for (let i in nexusPacketVersions) {
 
@@ -277,7 +276,7 @@ function searchVersion(packetName, version) {
 
     }
 
-if (result.length !== 0){
+if (result.length !== 0){ // Блок установки пакетов из нексуса, для того чтобы максимально подтягивать подходящие версии, которые есть на нексусе
     let copy = result;
     copy.sort( function (a, b) {
         let aExploded = a.replace(/\^~/ig, "").split(".");
@@ -313,24 +312,21 @@ if (result.length !== 0){
             }
         }
         return result;
-
     })
-    //console.log(copy)
     versionCorrection[packetName]=result[ result.length -1 ];
 }
     return result || []
 
 }
 
-console.log(FgGreen)
+console.log(moduleTests)
 
 function searchDependencies(reqDependency, version) {
     let res = searchVersion(reqDependency, version)
     let nexusPacketVersions = nexus.dependencies[reqDependency] // Что есть в нексусе
     let pName = `${reqDependency}`  // packageName formatter
     let pVersion = `${version.replace("^", "")}` // packageVersion formatter
-    if (nexusPacketVersions === undefined) {
-
+    if (nexusPacketVersions === undefined) { // Нет версий в нексусе
         if (!nonExsisting.get(pName))
             nonExsisting.set(pName, new Set())
         if (!nonExsisting.get(pName).has(pVersion))
@@ -338,8 +334,6 @@ function searchDependencies(reqDependency, version) {
         p++
     } else {
         if (res.length === 0) { // В res будут элементЫ, если есть подходящие версии
-
-
             if (!existing.get(pName)) {
                 existing.set(pName, new Set())
             }
@@ -373,12 +367,9 @@ for (let i in allDependencies) {
     }
 
 }
-WriteFile("corrections",JSON.stringify(versionCorrection))
-//console.log("End")
 
 
-//console.log(nonExsisting)
-function printToFile(file,parsedSet) {
+function setToFile(file,parsedSet) {
     let result = {}
     for (let [k, v] of parsedSet) {
 
@@ -388,12 +379,12 @@ function printToFile(file,parsedSet) {
         }
 
     }
-   // console.log(result)
     WriteFile(file,JSON.stringify(result))
 }
 
-printToFile("Несуществующие пакеты_",nonExsisting)
-printToFile("Существующие пакеты_",existing)
+WriteFile("corrections",JSON.stringify(versionCorrection))
+setToFile("Несуществующие пакеты_",nonExsisting)
+setToFile("Существующие пакеты_",existing)
 
 
 console.log(`Не хватает ${p} пакетов`)
