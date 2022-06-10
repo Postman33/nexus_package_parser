@@ -3,15 +3,15 @@ const cliProgress = require("cli-progress")
 const colors = require("ansi-colors")
 const day24Feb = new Date('2022-02-24T06:00:00');
 
-let WriteFile = require("./utils/file_system/writeFile")
-let ReadFile = require("./utils/file_system/readFile")
-let ExistsFile = require("./utils/file_system/existsFile")
+let WriteFile = require("../utils/file_system/writeFile")
+let ReadFile = require("../utils/file_system/readFile")
+let ExistsFile = require("../utils/file_system/existsFile")
 
 let errorsPackages = new Set();
-if (!ExistsFile("versions_cache")) {
-    WriteFile("versions_cache", JSON.stringify({}))
+if (!ExistsFile("result/date_check/versions_cache")) {
+    WriteFile("result/date_check/versions_cache", JSON.stringify({}))
 }
-let MRU_Cache = ReadFile("versions_cache") // Кеш Most recently used
+let MRU_Cache = ReadFile("result/date_check/versions_cache") // Кеш Most recently used
 function execFn(name, arrayOfVersions) {
     function viewDate(reject, resolve) {
         exec(
@@ -35,7 +35,7 @@ function execFn(name, arrayOfVersions) {
                 MRU_Cache[name] = {
                     name: name,
                     version: arrayOfVersions,
-                    validTo: Date.now() + 90 * 1000 * 60 * 60* 60,
+                    validTo: Date.now() + 24 * 60 * 1000 * 60 * 60 * 60,
                     json: json
                 }
 
@@ -70,7 +70,7 @@ function execFn(name, arrayOfVersions) {
 }
 
 let asyncFn = async function () {
-    let readFile = {...await ReadFile("Несуществующие пакеты_"), ...await ReadFile("Существующие пакеты_")}
+    let readFile = {...await ReadFile("translatedExists"), ...await ReadFile("translatedNotExists")}
     const b1 = new cliProgress.SingleBar({
         format: "CLI " + colors.cyan('{bar}') + "| {percentage}% || {value}/{total} Chunks || Speed: {speed}",
         barCompleteChar: "\u2588",
@@ -96,7 +96,7 @@ let asyncFn = async function () {
         })
     }
     b1.stop()
-    WriteFile("versions_cache", JSON.stringify(MRU_Cache))
+    WriteFile("result/date_check/versions_cache", JSON.stringify(MRU_Cache))
     console.log("Ошибки в пакетах:")
     console.log(errorsPackages)
 }

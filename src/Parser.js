@@ -1,14 +1,14 @@
-let nexus = require('./dependies.json');
-let check_dependies = require('./p-l.json');
+let nexus = require('../dependies.json');
+let check_dependies = require('../p-l.json');
 
 function isNumber(val) {
     // negative or positive
     return /^[-]?\d+$/.test(val);
 }
 
-let ReadFile = require("./utils/file_system/readFile")
+let ReadFile = require("../utils/file_system/readFile")
 
-let WriteFile = require("./utils/file_system/writeFile")
+let WriteFile = require("../utils/file_system/writeFile")
 
 let nonExsisting = new Map()
 let existing = new Map()
@@ -245,11 +245,11 @@ function searchVersion(packetName, version) {
         }
         if (firstCharOfMajorVersion === "~") {
             compareResult =compareTwoVersionsTilda(explodedVersionNumbers, explodedNesusVersion);
-            compareResult = true // TODO: проверить
+           // compareResult = true // TODO: проверить
         }
-        if (isNumber(majorVersion) && majorVersion[0] !== "^") {
+        if (isNumber(majorVersion) && firstCharOfMajorVersion !== "^") {
             compareResult =compareTwoVersionsNumbers(explodedVersionNumbers, explodedNesusVersion);
-            compareResult = true // TODO: проверить
+            //compareResult = true // TODO: проверить
         }
 
         if (compareResult) {
@@ -382,9 +382,9 @@ function setToFile(file,parsedSet) {
     WriteFile(file,JSON.stringify(result))
 }
 
-WriteFile("corrections",JSON.stringify(versionCorrection))
-setToFile("Несуществующие пакеты_",nonExsisting)
-setToFile("Существующие пакеты_",existing)
+WriteFile("result/level3/Коррекция версий",JSON.stringify(versionCorrection))
+setToFile("result/level1/Несуществующие пакеты",nonExsisting)
+setToFile("result/level1/Существующие пакеты",existing)
 
 
 console.log(`Не хватает ${p} пакетов`)
