@@ -7,13 +7,27 @@ let WriteFile = require("../utils/file_system/writeFile")
 let ReadFile = require("../utils/file_system/readFile")
 let ExistsFile = require("../utils/file_system/existsFile")
 
-let errorsPackages = new Set();
+let errorsPackages = new Set(); // Выводим информацию о пакетах с ошибками в дате
 if (!ExistsFile("result/date_check/versions_cache")) {
     WriteFile("result/date_check/versions_cache", JSON.stringify({}))
 }
 let MRU_Cache = ReadFile("result/date_check/versions_cache") // Кеш Most recently used
+// Кеш MRU - то есть для каждого пакета обновление данных раз в N миллисекунд, сейчас стоит 60 дней вроде
+function checkDate(arrayOfVersions, json, name) {
+    let check = true;
+    for (let key in arrayOfVersions) {
+        let version = arrayOfVersions[key]
+        let date_ob = new Date(json[version]);
+        if (date_ob > day24Feb) {
+            check = false;
+            errorsPackages.add(name + "@" + version)
+        }
+    }
+    return check;
+}
+// Измененный код Ани, добавил кеши и немного рефакторинга
 function execFn(name, arrayOfVersions) {
-    function viewDate(reject, resolve) {
+    function NPM_VIEW_DATE(reject, resolve) {
         exec(
             `npm view ${name} time --json`,
             (error, stdout, stderr) => {
@@ -22,20 +36,12 @@ function execFn(name, arrayOfVersions) {
                     return;
                 }
                 let json = JSON.parse(stdout);
-                let check = true;
-                for (let key in arrayOfVersions) {
-                    let version = arrayOfVersions[key]
-                    let date_ob = new Date(json[version]);
-                    if (date_ob > day24Feb) {
-                        check = false;
-                        errorsPackages.add(name + "@" + version)
-                    }
-                }
+                let check = checkDate(arrayOfVersions, json, name);
 
                 MRU_Cache[name] = {
                     name: name,
                     version: arrayOfVersions,
-                    validTo: Date.now() + 24 * 60 * 1000 * 60 * 60 * 60,
+                    validTo: Date.now() + 24 * 60 * 1000 * 60 * 60 * 60, // Уже не помню что ставил, но вроде 60 дней //TODO:исправить на 60 дней
                     json: json
                 }
 
@@ -49,22 +55,14 @@ function execFn(name, arrayOfVersions) {
             let MRU_label = MRU_Cache[name]
             if (Date.now() < +MRU_label.validTo) {
                 let json = MRU_label.json;
-                let check = true;
-                for (let key in arrayOfVersions) {
-                    let version = arrayOfVersions[key]
-                    let date_ob = new Date(json[version]);
-                    if (date_ob > day24Feb) {
-                        check = false;
-                        errorsPackages.add(name + "@" + version)
-                    }
-                }
+                checkDate(arrayOfVersions, json, name);
                 resolve(MRU_label)
             } else {
                 delete MRU_Cache[name];
-                viewDate(reject, resolve)
+                NPM_VIEW_DATE(reject, resolve)
             }
         } else {
-            viewDate(reject, resolve);
+            NPM_VIEW_DATE(reject, resolve);
         }
     });
 }
@@ -86,7 +84,7 @@ let asyncFn = async function () {
         speed: "1 package"
     })
 
-    let k = 0;
+    let k = 0; // Текущее состояние ProgressBar
     for (let key in readFile) {
         await execFn(key, readFile[key]).then((r) => {
             k++
@@ -98,6 +96,11 @@ let asyncFn = async function () {
     b1.stop()
     WriteFile("result/date_check/versions_cache", JSON.stringify(MRU_Cache))
     console.log("Ошибки в пакетах:")
-    console.log(errorsPackages)
+    if (errorsPackages.size === 0 ){
+        console.log(colors.green("-->Ошибок нет!"))
+    } else {
+        console.log(colors.red("-->Есть пакеты после 24 февраля!"))
+        console.log(errorsPackages)
+    }
 }
 asyncFn();

@@ -1,16 +1,17 @@
 let nexus = require('../dependies.json');
 let check_dependies = require('../p-l.json');
 let versionCorrection = {} // Корректировки версий с теми, что есть в нексусе
-
+let c = require("ansi-colors")
 let isNumber = require("../utils/isNumber")
-
-let WriteFile = require("../utils/file_system/writeFile")
-
+let writeFile = require("../utils/file_system/writeFile")
 let nonExsisting = new Map()
 let existing = new Map()
-
 let allDependencies = check_dependies.dependencies;
+// Основной файл, парсит весь package-lock.json, ищет первичные пакеты, которых нет в нексусе
+// С версиями "~" и числовыми не работает, за это отвечает файл PreProcess.js
 
+
+// Юнит-тесты, больше не нужны
 // function ModuleTests() {
 //     let FgRed = "\x1b[31m"
 //     let FgGreen = "\x1b[32m"
@@ -149,38 +150,25 @@ function searchVersion(packetName, version) {
         let nexusVersion = nexusPacketVersions[i];
         let explodedNesusVersion = nexusVersion.split("."); // Разбиваем нексус версию i пакета на точки
         let compareResult
-
         if (firstCharOfMajorVersion === "^") {
             compareResult = compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion);
         }
         if (firstCharOfMajorVersion === "~") {
             compareResult = compareTwoVersionsTilda(explodedVersionNumbers, explodedNesusVersion);
-            // compareResult = true // TODO: проверить
         }
         if (isNumber(majorVersion) && firstCharOfMajorVersion !== "^") {
             compareResult = compareTwoVersionsNumbers(explodedVersionNumbers, explodedNesusVersion);
-            //compareResult = true // TODO: проверить
         }
-
         if (compareResult) {
             result.push(nexusVersion)
         }
 
     }
 
-    if (isNumber(majorVersion) && majorVersion[0] !== "^") { // TODO: проверить
-        let compareResult = false
-        for (let i in nexusPacketVersions) {
-            let nexusVersion = nexusPacketVersions[i];
-            if (nexusVersion === version) {
-                compareResult = true;
-            }
-        }
-        if (compareResult) result.push(version)
-    }
 
     if (result.length !== 0) { // Блок установки пакетов из нексуса, для того чтобы максимально подтягивать подходящие версии, которые есть на нексусе
         let copy = result;
+        // Берем последний пакет из нексуса и его устанавливаем
         copy.sort(function (a, b) {
             let aExploded = a.replace(/\^~/ig, "").split(".");
             let bExploded = b.replace(/\^~/ig, "").split(".");
@@ -224,18 +212,18 @@ function searchVersion(packetName, version) {
 function searchDependencies(reqDependency, version) {
     let res = searchVersion(reqDependency, version)
     let nexusPacketVersions = nexus.dependencies[reqDependency] // Что есть в нексусе
-    let pName = `${reqDependency}`  // packageName formatter
-    let pVersion = `${version.replace("^", "")}` // packageVersion formatter
+    let packageNameFormatter = `${reqDependency}`
+    let packageVersionFormatter = `${version.replace("^", "")}`
     if (nexusPacketVersions === undefined) { // Нет версий в нексусе
         // Если нет множества пакетов по ключу pName, добавляем множество по ключу pName
-        if (!nonExsisting.get(pName)) nonExsisting.set(pName, new Set())
-        if (!nonExsisting.get(pName).has(pVersion)) nonExsisting.get(pName).add(pVersion)
+        if (!nonExsisting.get(packageNameFormatter)) nonExsisting.set(packageNameFormatter, new Set())
+        if (!nonExsisting.get(packageNameFormatter).has(packageVersionFormatter)) nonExsisting.get(packageNameFormatter).add(packageVersionFormatter)
     } else {
         if (res.length === 0) { // В res будут элементЫ, если есть подходящие версии
-            if (!existing.get(pName)) {
-                existing.set(pName, new Set())
+            if (!existing.get(packageNameFormatter)) {
+                existing.set(packageNameFormatter, new Set())
             }
-            if (!existing.get(pName).has(pVersion)) existing.get(pName).add(pVersion)
+            if (!existing.get(packageNameFormatter).has(packageVersionFormatter)) existing.get(packageNameFormatter).add(packageVersionFormatter)
         }
     }
 }
@@ -244,7 +232,7 @@ function searchDependencies(reqDependency, version) {
 for (let i in allDependencies) {
     if (i === '') continue // Пустые пакеты не интересуют
     let topLevelDependency = allDependencies[i]
-   // if (topLevelDependency.resolved && topLevelDependency.resolved.search("smart.mos.ru") !== -1) continue // Если установили со Smart.mos.ru, мы не анализируем их зависимости, т.к.
+   if (topLevelDependency.resolved && topLevelDependency.resolved.search("smart.mos.ru") !== -1) continue // Если установили со Smart.mos.ru, мы не анализируем их зависимости, т.к.
     // в нексусе есть нужные библиотеки
 
     searchDependencies(i, topLevelDependency.version); // Обход зависимостей на 1-м уровне
@@ -255,9 +243,7 @@ for (let i in allDependencies) {
         if (version.search('[x\*]') !== -1) continue // Пропуск бесполезных пакетов
         if (version.search(/>=|<=|<|>|!=|\|\|/) !== -1) continue // Пока нет блока обработки таких версий
         searchDependencies(reqDependency, version);  // Обход зависимостей на 2-м уровне
-
     }
-
 }
 
 // Сохранение результата в файл
@@ -269,10 +255,10 @@ function setToFile(file, parsedSet) {
             result[k].push(version)
         }
     }
-    WriteFile(file, JSON.stringify(result))
+    writeFile(file, JSON.stringify(result))
 }
 
-WriteFile("result/level3/Коррекция версий", JSON.stringify(versionCorrection))
+writeFile("result/level3/Коррекция версий", JSON.stringify(versionCorrection))
 setToFile("result/level1/Несуществующие пакеты", nonExsisting)
 setToFile("result/level1/Существующие пакеты", existing)
 
