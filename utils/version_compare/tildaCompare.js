@@ -1,4 +1,4 @@
-function compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion) {
+function compareTwoVersionsTilda(explodedVersionNumbers, explodedNesusVersion) {
 
     let result = false
 
@@ -6,7 +6,7 @@ function compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion) {
         return result;
     }
 
-    for (let b = 1; b < explodedVersionNumbers.length;) {
+    for (let b = 1; b < explodedVersionNumbers.length-1;) {
         if (+explodedNesusVersion[b] > +explodedVersionNumbers[b]) {
             result = true
             break;
@@ -17,7 +17,7 @@ function compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion) {
         }
         if (explodedNesusVersion[b] === explodedVersionNumbers[b]) {
             b++
-            if (b === explodedNesusVersion.length) {
+            if (b === explodedNesusVersion.length-1) {
                 result = true
                 break;
             }
@@ -28,5 +28,4 @@ function compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion) {
     }
     return result;
 }
-
-module.exports = compareTwoVersionsUp
+module.exports = compareTwoVersionsTilda

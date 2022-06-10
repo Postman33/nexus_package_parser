@@ -13,6 +13,9 @@ for (let i in packagesExists) {
         delete packagesExists[i]
         console.log(`Удален ${i}@${v}`)
     }
+    if (v.length === 0) {
+        delete packagesExists[i]
+    }
 }
 
 

@@ -70,7 +70,7 @@ function execFn(name, arrayOfVersions) {
 }
 
 let asyncFn = async function () {
-    let readFile = {...await ReadFile("translatedExists"), ...await ReadFile("translatedNotExists")}
+    let readFile = {...await ReadFile("result/level2(системные файлы)/translatedExists"), ...await ReadFile("result/level2(системные файлы)/translatedNotExists")}
     const b1 = new cliProgress.SingleBar({
         format: "CLI " + colors.cyan('{bar}') + "| {percentage}% || {value}/{total} Chunks || Speed: {speed}",
         barCompleteChar: "\u2588",

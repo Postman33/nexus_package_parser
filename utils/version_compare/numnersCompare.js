@@ -1,4 +1,4 @@
-function compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion) {
+function compareTwoVersionsNumbers(explodedVersionNumbers, explodedNesusVersion) {
 
     let result = false
 
@@ -28,5 +28,4 @@ function compareTwoVersionsUp(explodedVersionNumbers, explodedNesusVersion) {
     }
     return result;
 }
-
-module.exports = compareTwoVersionsUp
+module.exports = compareTwoVersionsNumbers
