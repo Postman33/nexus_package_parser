@@ -255,7 +255,7 @@ function setToFile(file, parsedSet) {
             result[k].push(version)
         }
     }
-    writeFile(file, JSON.stringify(result))
+    writeFile(file, result)
 }
 
 writeFile("result/level3/Коррекция версий", JSON.stringify(versionCorrection))

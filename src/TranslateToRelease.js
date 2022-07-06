@@ -9,17 +9,41 @@ for (let i in packagesExists) {
     let v = packagesExists[i]
     let nx = nexus.dependencies[i]
     if (nx === undefined) continue
+
     packagesExists[i] = [...new Set([...nx, ...v])]
+
+
+    //if (i== "fsevents") {
+    let allTest = false;
+    for (let k of v) {
+        if (nx == undefined) continue
+        if (nx.includes(k)) {
+            allTest = true
+        } else {
+            allTest = false;
+            break;
+        }
+    }
+    if (allTest) {
+        delete packagesExists[i]
+        console.log(c.red(`Удален имеющийся эл. ${i}@${v}`))
+        continue
+    }
+
     if (nx.length === packagesExists[i].length){
         delete packagesExists[i]
         console.log(c.white(`Удален дубликат ${i}@${v}`))
+        continue
     }
     if (v.length === 0) {
         delete packagesExists[i]
         console.log(c.yellow(`Удален пустой пакет ${i}`))
+        continue
     }
+
 }
 console.log("\n")
 
-WriteFile('result/level3/addToNexus', packagesExists)
+
 console.log(c.green("Файл записался в result/level3/addToNexus!"))
+WriteFile('result/level3/addToNexus', packagesExists)

@@ -35,11 +35,15 @@ parseAllPackages(packagesNonExists);
 function loadInstalledVersion(pName, pVersion) {
     for (let i in check_dependies.dependencies) {
         let dep = check_dependies.dependencies[i]
-        if (i.search(pName) === -1) continue
+        if (i !== pName) continue
         let dep_version = dep.version.replace(/~/ig, '').split(".")
         let p_version = pVersion.replace(/~/ig, '').split(".")
-        if (compareTilda(dep_version, p_version))
+        if (compareTilda(dep_version, p_version)){
+            console.log(c.blue( `пакет ${i}`))
+
             return dep.version
+        }
+
     }
 }
 
