@@ -3,8 +3,10 @@ const {exec} = require('child_process');
 let semver = require("semver")
 let pack = require("../package_NLZ.json")
 let nexus = require("../dependies.json")
-let name = "mongoose"
 let validationList = []
+//let ValidationListFrame = {}
+let ValidationListFrameCache = {}
+
 const util  = require("util");
 const ansiColors = require("ansi-colors");
 const execPromise = util.promisify(exec);
@@ -15,6 +17,8 @@ let writeFile = require("../utils/file_system/writeFile")
 // оптимизациц
 // проверка дат
 // авто-корректировка, если даты не совпали
+let cacheMDL = require("./modules/cache/cache")
+cacheMDL.init("test")
 let checkedLibs = new Set()
 function execShellCommand(cmd,cb) {
     return new Promise((resolve, reject) => {
@@ -30,33 +34,58 @@ function execShellCommand(cmd,cb) {
     });
 }
 
+async function extracted(json, lib) {
+    for (let libName in json) {
+        let reqVersion = json[libName] // Требование к пакетным версиям
+        validationList[libName] = validationList[libName] || []
+        validationList[libName].push(reqVersion)
+       // ValidationListFrame[libName] = validationList[libName];
+
+        if (semver.validRange(reqVersion)) {
+            if (nexus.dependencies[libName]) {
+                let g = semver.minSatisfying(nexus.dependencies[libName], reqVersion) || semver.minVersion(reqVersion).version
+                console.log(ansiColors.cyan(`min satis is ${g}`))
+                reqVersion = g;
+            } else {
+                reqVersion = semver.minVersion(reqVersion).version
+            }
+            console.log(`lib+${libName}${reqVersion}`)
+        }
+
+        await analyzeDependencies(libName + "@" + reqVersion)
+
+    }
+    checkedLibs.add(lib)
+}
+
 async function analyzeDependencies(lib) {
     if (lib.indexOf( '[object Object]') !== -1) return;
     if (checkedLibs.has(lib)) return;
+
+    console.log(lib)
+
+    if (cacheMDL.readKey(lib)){
+        console.log(`Return await ${lib}`)
+        return  await extracted(cacheMDL.readKey(lib), lib);
+    }
+    console.log("Return not await")
     return execShellCommand(
         `npm view ${lib} dependencies --json`,
         async (stdout) => {
-            if (stdout === '') return;
-            let json = JSON.parse(stdout);
-            for (let libName in json) {
-                let reqVersion = json[libName] // Требование к пакетным версиям
-                validationList[libName] = validationList[libName] || []
-                validationList[libName].push(reqVersion)
-                if (semver.validRange(reqVersion)){
-                    if (nexus.dependencies[libName]){
-                        let g = semver.minSatisfying(nexus.dependencies[libName], reqVersion) || semver.minVersion(reqVersion).version
-                        console.log(ansiColors.cyan(`min satis is ${g}`))
-                        reqVersion = g;
-                    } else {
-                        reqVersion = semver.minVersion(reqVersion).version
-                    }
-                    console.log(`lib+${libName}${reqVersion}`)
-                }
-
-                await analyzeDependencies(libName + "@" + reqVersion)
-
+            if (stdout === '') {
+                cacheMDL.cacheKey(lib, {});
+                cacheMDL.endOp()
+                return;
             }
-            checkedLibs.add(lib)
+            let json = JSON.parse(stdout);
+            //ValidationListFrame[lib] = json;
+
+            // cacheMDL.startOp()
+             cacheMDL.cacheKey(lib,json);
+             cacheMDL.endOp()
+            await extracted(json, lib);
+
+
         });
 
 }
@@ -77,6 +106,7 @@ function optimizeVersions(versions){
 }
 
 let s = async ()=> {
+    cacheMDL.startOp();
     const dependencies = pack.dependencies;
     const devDependencies = pack.devDependencies; // TODO
     for (let lib in dependencies) {
@@ -89,6 +119,7 @@ let s = async ()=> {
         validationList[lib] = validationList[lib] || []
         validationList[lib].push(devDependencies[lib])
         await analyzeDependencies(lib + "@" + devDependencies[lib])
+
     }
     console.log("Compare")
     console.log(validationList)
@@ -131,7 +162,6 @@ let s = async ()=> {
 
                 }
                 if (!test){ // если тест не пройден, добавляем
-
                     if (semver.validRange(reqVer) != null) {
                         existPackets[packet].push( semver.minVersion(reqVer).version)
                     } else {
