@@ -40,11 +40,9 @@ async function processLibsResponse(json, lib) {
         validationList[libName] = validationList[libName] || []
         validationList[libName].push(reqVersion)
 
-        if (semver.validRange(reqVersion)) {
+        if (semver.validRange(reqVersion)) { // Ищем минимальную версию для поиска dependencies, без ~,^, >=, <=
             if (nexus.dependencies[libName]) {
-                let g = semver.minSatisfying(nexus.dependencies[libName], reqVersion) || semver.minVersion(reqVersion).version
-                console.log(ansiColors.cyan(`min satis is ${g}`))
-                reqVersion = g;
+                reqVersion = semver.minSatisfying(nexus.dependencies[libName], reqVersion) || semver.minVersion(reqVersion).version;
             } else {
                 reqVersion = semver.minVersion(reqVersion).version
             }
@@ -103,7 +101,7 @@ function optimizeVersions(versions){
     }
     return arr;
 }
-
+// main - вход в основное приложение
 let s = async ()=> {
     cacheMDL.startOp();
     const dependencies = pack.dependencies;
