@@ -29,17 +29,16 @@ function execShellCommand(cmd,cb) {
             }
             await cb(stdout)
             // TODO: Change args
-            resolve(stdout ? stdout : stderr);
+            resolve(stdout);
         });
     });
 }
 
-async function extracted(json, lib) {
+async function processLibsResponse(json, lib) {
     for (let libName in json) {
         let reqVersion = json[libName] // Требование к пакетным версиям
         validationList[libName] = validationList[libName] || []
         validationList[libName].push(reqVersion)
-       // ValidationListFrame[libName] = validationList[libName];
 
         if (semver.validRange(reqVersion)) {
             if (nexus.dependencies[libName]) {
@@ -66,7 +65,7 @@ async function analyzeDependencies(lib) {
 
     if (cacheMDL.readKey(lib)){
         console.log(`Return await ${lib}`)
-        return  await extracted(cacheMDL.readKey(lib), lib);
+        return  await processLibsResponse(cacheMDL.readKey(lib), lib);
     }
     console.log("Return not await")
     return execShellCommand(
@@ -83,7 +82,7 @@ async function analyzeDependencies(lib) {
             // cacheMDL.startOp()
              cacheMDL.cacheKey(lib,json);
              cacheMDL.endOp()
-            await extracted(json, lib);
+            await processLibsResponse(json, lib);
 
 
         });
@@ -108,21 +107,19 @@ function optimizeVersions(versions){
 let s = async ()=> {
     cacheMDL.startOp();
     const dependencies = pack.dependencies;
-    const devDependencies = pack.devDependencies; // TODO
-    for (let lib in dependencies) {
-        validationList[lib] = validationList[lib] || []
-        validationList[lib].push(dependencies[lib])
-        await analyzeDependencies(lib + "@" + dependencies[lib])
-    }
-    for (let lib in devDependencies) {
-        console.log(ansiColors.blue(`Анализируетс dev-dep ${lib + "@" + devDependencies[lib]}`))
-        validationList[lib] = validationList[lib] || []
-        validationList[lib].push(devDependencies[lib])
-        await analyzeDependencies(lib + "@" + devDependencies[lib])
+    const devDependencies = pack.devDependencies;
 
+    async function parseDependencies(depList) {
+        for (let lib in depList) {
+            validationList[lib] = validationList[lib] || []
+            validationList[lib].push(depList[lib])
+            await analyzeDependencies(lib + "@" + depList[lib])
+        }
     }
-    console.log("Compare")
-    console.log(validationList)
+
+    await parseDependencies(dependencies);
+    await parseDependencies(devDependencies);
+
 
     for (let packet in validationList){
         validationList[packet] = optimizeVersions(validationList[packet])
@@ -140,11 +137,10 @@ let s = async ()=> {
         if (nexusPacket === undefined){ // Если пакета нет в нексусе, добавляем минимальные версии для каждого требования
             for(let i in versions){
                 let reqVer = versions[i]
-              //  console.log('tt')
-                if (semver.validRange(reqVer) != null) {
+                if (semver.validRange(reqVer) != null) { // Если это Range, берем мин. версию
                     unExistPackets[packet].push( semver.minVersion(reqVer).version)
                 } else {
-                    unExistPackets[packet].push(reqVer )
+                    unExistPackets[packet].push(reqVer ) // Это не Range, берем версию
                 }
             }
         } else { // Есть пакет в нексусе
@@ -158,7 +154,6 @@ let s = async ()=> {
                     if (semver.satisfies( nexusVer, reqVer)){
                         test = true; // Тест пройден, версию не надо добавлять
                     }
-                    console.log(`Satisfying ${test}`)
 
                 }
                 if (!test){ // если тест не пройден, добавляем
@@ -168,11 +163,7 @@ let s = async ()=> {
                         existPackets[packet].push(reqVer)
                     }
                 }
-
                 existPackets[packet] = optimizeVersions(existPackets[packet])
-                // console.log('tt')
-                // unExistPackets[packet] = unExistPackets[packet] || []
-                // unExistPackets[packet].push( semver.minVersion(reqVer).version)
             }
         }
 
