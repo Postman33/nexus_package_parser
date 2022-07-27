@@ -1,13 +1,13 @@
 //view <packageName> --dependencies
 const {exec} = require('child_process');
 let semver = require("semver")
-let pack = require("../package_NLZ.json")
+let pack = require("../analyzePackage.json")
 let nexus = require("../dependies.json")
 let validationList = []
 //let ValidationListFrame = {}
 let ValidationListFrameCache = {}
 
-const util  = require("util");
+const util = require("util");
 const ansiColors = require("ansi-colors");
 const execPromise = util.promisify(exec);
 let fs = require("fs")
@@ -20,7 +20,8 @@ let writeFile = require("../utils/file_system/writeFile")
 let cacheMDL = require("./modules/cache/cache")
 cacheMDL.init("test")
 let checkedLibs = new Set()
-function execShellCommand(cmd,cb) {
+
+function execShellCommand(cmd, cb) {
     return new Promise((resolve, reject) => {
         exec(cmd, async (error, stdout, stderr) => {
 
@@ -46,7 +47,7 @@ async function processLibsResponse(json, lib) {
             } else {
                 reqVersion = semver.minVersion(reqVersion).version
             }
-           // console.log(`lib+${libName}${reqVersion}`)
+            console.log(`lib+${libName}${reqVersion}`)
         }
 
         await analyzeDependencies(libName + "@" + reqVersion)
@@ -56,17 +57,19 @@ async function processLibsResponse(json, lib) {
 }
 
 async function analyzeDependencies(lib) {
-    if (lib.indexOf( '[object Object]') !== -1) {
+    if (lib.indexOf('[object Object]') !== -1) {
         console.log('Object')
         console.dir(lib)
-        return};
-   // if (checkedLibs.has(lib)) return;
+        return
+    }
+    ;
+     if (checkedLibs.has(lib)) return;
 
-   // console.log(lib)
+    // console.log(lib)
 
-    if (cacheMDL.readKey(lib)){
-      //  console.log(`Return await ${lib}`)
-        return  await processLibsResponse(cacheMDL.readKey(lib), lib);
+    if (cacheMDL.readKey(lib)) {
+        //  console.log(`Return await ${lib}`)
+        return await processLibsResponse(cacheMDL.readKey(lib), lib);
     }
     //console.log("Return not await")
     return execShellCommand(
@@ -81,24 +84,25 @@ async function analyzeDependencies(lib) {
             //ValidationListFrame[lib] = json;
 
             // cacheMDL.startOp()
-             cacheMDL.cacheKey(lib,json);
-             cacheMDL.endOp()
+            cacheMDL.cacheKey(lib, json);
+            cacheMDL.endOp()
             await processLibsResponse(json, lib);
 
 
         });
 
 }
-function optimizeVersions(versions){
+
+function optimizeVersions(versions) {
     let arr = versions;
     let k = 0;
-    for (let p1 in arr){
+    for (let p1 in arr) {
         let v1 = arr[p1]
-        for (let p2 in arr){
+        for (let p2 in arr) {
             let v2 = arr[p2]
             if (v1 === v2 && p1 === p2) continue;
 
-            if (v1 !== 'REE' && v2 !== 'REE' && semver.subset(v1,v2)){
+            if (v1 !== 'REE' && v2 !== 'REE' && semver.subset(v1, v2)) {
                 let indexV2 = arr.indexOf(v2)
                 k++
                 if (indexV2 === 1) continue
@@ -107,13 +111,14 @@ function optimizeVersions(versions){
             }
         }
     }
-    arr = arr.filter((e,index) => e !== 'REE')
+    arr = arr.filter((e, index) => e !== 'REE')
 
     console.log(`K = ${k}`)
     return arr;
 }
+
 // main - вход в основное приложение
-let s = async ()=> {
+let s = async () => {
     cacheMDL.startOp();
     const dependencies = pack.dependencies;
     const devDependencies = pack.devDependencies;
@@ -130,44 +135,44 @@ let s = async ()=> {
     await parseDependencies(devDependencies);
 
 
-    for (let packet in validationList){
+    for (let packet in validationList) {
         validationList[packet] = optimizeVersions(validationList[packet])
     }
 
     let unExistPackets = {}
     let existPackets = {}
 
-    for (let packet in validationList){
+    for (let packet in validationList) {
         unExistPackets[packet] = unExistPackets[packet] || []
         existPackets[packet] = existPackets[packet] || []
         let versions = validationList[packet]
         console.log(`packet ${packet}`)
-        let nexusPacket = nexus.dependencies[ packet ]
-        if (nexusPacket === undefined){ // Если пакета нет в нексусе, добавляем минимальные версии для каждого требования
-            for(let i in versions){
+        let nexusPacket = nexus.dependencies[packet]
+        if (nexusPacket === undefined) { // Если пакета нет в нексусе, добавляем минимальные версии для каждого требования
+            for (let i in versions) {
                 let reqVer = versions[i]
                 if (semver.validRange(reqVer) != null) { // Если это Range, берем мин. версию
-                    unExistPackets[packet].push( semver.minVersion(reqVer).version)
+                    unExistPackets[packet].push(semver.minVersion(reqVer).version)
                 } else {
-                    unExistPackets[packet].push(reqVer ) // Это не Range, берем версию
+                    unExistPackets[packet].push(reqVer) // Это не Range, берем версию
                 }
             }
         } else { // Есть пакет в нексусе
 
-            for(let i in versions){
+            for (let i in versions) {
                 let reqVer = versions[i]
                 let test = false;
-                for (let ni in nexusPacket){
+                for (let ni in nexusPacket) {
                     let nexusVer = nexusPacket[ni]
 
-                    if (semver.satisfies( nexusVer, reqVer)){
+                    if (semver.satisfies(nexusVer, reqVer)) {
                         test = true; // Тест пройден, версию не надо добавлять
                     }
 
                 }
-                if (!test){ // если тест не пройден, добавляем
+                if (!test) { // если тест не пройден, добавляем
                     if (semver.validRange(reqVer) != null) {
-                        existPackets[packet].push( semver.minVersion(reqVer).version)
+                        existPackets[packet].push(semver.minVersion(reqVer).version)
                     } else {
                         existPackets[packet].push(reqVer)
                     }
@@ -180,16 +185,16 @@ let s = async ()=> {
 
     console.log(existPackets)
     console.log(unExistPackets)
-    for (let a in existPackets){
+    for (let a in existPackets) {
         if (existPackets[a].length === 0) delete existPackets[a]
     }
-    for (let a in unExistPackets){
+    for (let a in unExistPackets) {
         if (unExistPackets[a].length === 0) delete unExistPackets[a]
     }
-    writeFile("add/ex",JSON.stringify(existPackets))
-    writeFile("add/unex",JSON.stringify(unExistPackets))
+    writeFile("add/ex", JSON.stringify(existPackets))
+    writeFile("add/unex", JSON.stringify(unExistPackets))
     console.log(ansiColors.blue("List after optimization"))
     console.log(validationList)
 }
- s();
+s();
 

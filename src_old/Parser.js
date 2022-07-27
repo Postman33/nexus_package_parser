@@ -1,5 +1,5 @@
 let nexus = require('../dependies.json');
-let check_dependies = require('../p-l.json');
+let check_dependies = require('../deprecated/p-l.json');
 let versionCorrection = {} // Корректировки версий с теми, что есть в нексусе
 let c = require("ansi-colors")
 let isNumber = require("../utils/isNumber")
