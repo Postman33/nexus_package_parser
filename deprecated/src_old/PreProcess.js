@@ -3,7 +3,7 @@ let readFile = require("../utils/file_system/readFile")
 let writeFile = require("../utils/file_system/writeFile")
 let packagesExists = readFile("result/level1/Существующие пакеты")
 let packagesNonExists = readFile("result/level1/Несуществующие пакеты")
-let check_dependies = require('../deprecated/p-l.json');
+let check_dependies = require('../p-l.json');
 
 let compareTilda = require("../utils/version_compare/tildaCompare")
 const c = require("ansi-colors");

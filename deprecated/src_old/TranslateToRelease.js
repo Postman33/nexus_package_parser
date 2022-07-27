@@ -1,4 +1,4 @@
-let nexus = require('../dependies.json');
+let nexus = require('../../dependies.json');
 let c = require("ansi-colors")
 let ReadFile = require("../utils/file_system/readFile")
 let WriteFile = require("../utils/file_system/writeFile")

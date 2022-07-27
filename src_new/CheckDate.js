@@ -3,9 +3,9 @@ const cliProgress = require("cli-progress")
 const colors = require("ansi-colors")
 const day24Feb = new Date('2022-02-24T06:00:00');
 
-let WriteFile = require("../utils/file_system/writeFile")
-let ReadFile = require("../utils/file_system/readFile")
-let ExistsFile = require("../utils/file_system/existsFile")
+let WriteFile = require("../deprecated/utils/file_system/writeFile")
+let ReadFile = require("../deprecated/utils/file_system/readFile")
+let ExistsFile = require("../deprecated/utils/file_system/existsFile")
 
 let errorsPackages = new Set(); // Выводим информацию о пакетах с ошибками в дате
 if (!ExistsFile("result/date_check/versions_cache")) {
