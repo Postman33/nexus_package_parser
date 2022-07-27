@@ -2,8 +2,8 @@ let nexus = require('../../dependies.json');
 let check_dependies = require('../p-l.json');
 let versionCorrection = {} // Корректировки версий с теми, что есть в нексусе
 let c = require("ansi-colors")
-let isNumber = require("../utils/isNumber")
-let writeFile = require("../utils/file_system/writeFile")
+let isNumber = require("../../utils/isNumber")
+let writeFile = require("../../utils/file_system/writeFile")
 let nonExsisting = new Map()
 let existing = new Map()
 let allDependencies = check_dependies.dependencies;
@@ -121,13 +121,13 @@ let allDependencies = check_dependies.dependencies;
 // let moduleTests = ModuleTests();
 
 // ^ версия
-let compareTwoVersionsUp = require("../utils/version_compare/upCompare")
+let compareTwoVersionsUp = require("../../utils/version_compare/upCompare")
 
 // Для сравнения базовых версий без символов
-let compareTwoVersionsNumbers = require("../utils/version_compare/numnersCompare")
+let compareTwoVersionsNumbers = require("../../utils/version_compare/numnersCompare")
 
 // Для сравнения базовых версий с тильдой
-let compareTwoVersionsTilda = require("../utils/version_compare/tildaCompare")
+let compareTwoVersionsTilda = require("../../utils/version_compare/tildaCompare")
 
 
 // depElementKey - название пакета

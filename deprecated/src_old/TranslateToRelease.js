@@ -1,7 +1,7 @@
 let nexus = require('../../dependies.json');
 let c = require("ansi-colors")
-let ReadFile = require("../utils/file_system/readFile")
-let WriteFile = require("../utils/file_system/writeFile")
+let ReadFile = require("../../utils/file_system/readFile")
+let WriteFile = require("../../utils/file_system/writeFile")
 let packagesExists = ReadFile("result/level2(системные файлы)/translatedExists")
 // Транслятор добавляемых пакетов, чтобы учесть старые пакеты (добавить то, что было в нексусе к тем пакетам, которые добавляем)
 // Также удаляются пустые пакеты и дубликаты

@@ -11,7 +11,7 @@ const util = require("util");
 const ansiColors = require("ansi-colors");
 const execPromise = util.promisify(exec);
 let fs = require("fs")
-let writeFile = require("../deprecated/utils/file_system/writeFile")
+let writeFile = require("../utils/file_system/writeFile")
 //fs.mkdirSync("../add")
 // TODO:
 // оптимизациц

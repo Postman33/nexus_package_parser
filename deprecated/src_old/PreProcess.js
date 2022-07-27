@@ -1,11 +1,11 @@
-let isNumber = require("../utils/isNumber")
-let readFile = require("../utils/file_system/readFile")
-let writeFile = require("../utils/file_system/writeFile")
+let isNumber = require("../../utils/isNumber")
+let readFile = require("../../utils/file_system/readFile")
+let writeFile = require("../../utils/file_system/writeFile")
 let packagesExists = readFile("result/level1/Существующие пакеты")
 let packagesNonExists = readFile("result/level1/Несуществующие пакеты")
 let check_dependies = require('../p-l.json');
 
-let compareTilda = require("../utils/version_compare/tildaCompare")
+let compareTilda = require("../../utils/version_compare/tildaCompare")
 const c = require("ansi-colors");
 // Подтягивает версии с тильдой или численные версии, признак - установленная версия
 function parseAllPackages(set) {
