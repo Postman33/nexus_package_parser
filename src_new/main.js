@@ -46,7 +46,7 @@ async function processLibsResponse(json, lib) {
             } else {
                 reqVersion = semver.minVersion(reqVersion).version
             }
-            console.log(`lib+${libName}${reqVersion}`)
+           // console.log(`lib+${libName}${reqVersion}`)
         }
 
         await analyzeDependencies(libName + "@" + reqVersion)
@@ -56,16 +56,19 @@ async function processLibsResponse(json, lib) {
 }
 
 async function analyzeDependencies(lib) {
-    if (lib.indexOf( '[object Object]') !== -1) return;
-    if (checkedLibs.has(lib)) return;
+    if (lib.indexOf( '[object Object]') !== -1) {
+        console.log('Object')
+        console.dir(lib)
+        return};
+   // if (checkedLibs.has(lib)) return;
 
-    console.log(lib)
+   // console.log(lib)
 
     if (cacheMDL.readKey(lib)){
-        console.log(`Return await ${lib}`)
+      //  console.log(`Return await ${lib}`)
         return  await processLibsResponse(cacheMDL.readKey(lib), lib);
     }
-    console.log("Return not await")
+    //console.log("Return not await")
     return execShellCommand(
         `npm view ${lib} dependencies --json`,
         async (stdout) => {
@@ -88,17 +91,25 @@ async function analyzeDependencies(lib) {
 }
 function optimizeVersions(versions){
     let arr = versions;
-    for (let p1 in versions){
-        let v1 = versions[p1]
-        for (let p2 in versions){
-            let v2 = versions[p2]
+    let k = 0;
+    for (let p1 in arr){
+        let v1 = arr[p1]
+        for (let p2 in arr){
+            let v2 = arr[p2]
             if (v1 === v2 && p1 === p2) continue;
 
-            if (semver.subset(v1,v2)){
-                arr = arr.filter(e => e !== v2)
+            if (v1 !== 'REE' && v2 !== 'REE' && semver.subset(v1,v2)){
+                let indexV2 = arr.indexOf(v2)
+                k++
+                if (indexV2 === 1) continue
+                arr[p2] = 'REE'
+                //arr = arr.filter((e,index) => indexV2 !== index)
             }
         }
     }
+    arr = arr.filter((e,index) => e !== 'REE')
+
+    console.log(`K = ${k}`)
     return arr;
 }
 // main - вход в основное приложение

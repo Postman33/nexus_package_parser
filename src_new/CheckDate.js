@@ -68,7 +68,7 @@ function execFn(name, arrayOfVersions) {
 }
 
 let asyncFn = async function () {
-    let readFile = {...await ReadFile("result/level2(системные файлы)/translatedExists"), ...await ReadFile("result/level2(системные файлы)/translatedNotExists")}
+    let readFile = {...await ReadFile("add/ex"), ...await ReadFile("add/unex")}
     const b1 = new cliProgress.SingleBar({
         format: "CLI " + colors.cyan('{bar}') + "| {percentage}% || {value}/{total} Chunks || Speed: {speed}",
         barCompleteChar: "\u2588",
@@ -94,7 +94,7 @@ let asyncFn = async function () {
         })
     }
     b1.stop()
-    WriteFile("result/date_check/versions_cache", JSON.stringify(MRU_Cache))
+    WriteFile("result/date_check/versions_cache", JSON.stringify(MRU_Cache),true)
     console.log("Ошибки в пакетах:")
     if (errorsPackages.size === 0 ){
         console.log(colors.green("-->Ошибок нет!"))

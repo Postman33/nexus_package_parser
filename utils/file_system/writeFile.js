@@ -3,7 +3,8 @@ const fs = require("fs");
 const path = require("path")
 
 
-function prettyPrintJSON(json) {
+function prettyPrintJSON(json,bool) {
+if (bool) return json;
 
     function replaceAll(str, find, replace) {
         return str.replace(/find/g, replace);
@@ -18,10 +19,10 @@ function prettyPrintJSON(json) {
         }
         else return v;
     }, '\t ').replace(/\\/g, '')
-        .replace(/\"\[/g, '[')
-        .replace(/\]\"/g, ']')
-        .replace(/\"\{/g, '{')
-        .replace(/\}\"/g, '}')
+        .replace(/"\[/g, '[')
+        .replace(/]"/g, ']')
+        .replace(/"\{/g, '{')
+        .replace(/}"/g, '}')
         .replace('{\n\t "dependencies"', '{"dependencies"')
         .replace('\t }\n}', '}}');
 
@@ -31,11 +32,11 @@ function prettyPrintJSON(json) {
 }
 
 
-
-function WriteFile(filename, jsonBody) {
+// flag = false по умолчанию. Если flag == true, то не сохраняет в красвиом виде
+function WriteFile(filename, jsonBody, flag) {
     console.log(__dirname)
     let filePath = path.join(__dirname, `../../${filename}.json`);
     if (typeof(jsonBody) != "string") jsonBody = JSON.stringify(jsonBody)
-    fs.writeFileSync(filePath, prettyPrintJSON(jsonBody), {});
+    fs.writeFileSync(filePath, prettyPrintJSON(jsonBody,flag), {});
 }
 module.exports = WriteFile
